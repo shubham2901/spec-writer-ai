@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Sanity Checker | WebLLM Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --accent-color: #f43f5e;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            color: var(--text-dim);
+            margin-bottom: 32px;
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background: var(--text-dim);
+        }
+
+        .status-dot.active {
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            background: var(--text-dim);
+        }
+
+        .results {
+            margin-top: 32px;
+            padding: 24px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .progress-container {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #6ee7b7;
+        }
+
+        .mobile-notice {
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Spec Edge AI</h1>
+        <p class="subtitle">Client-side sanity check via WebLLM (Gemma-2b)</p>
+
+        <div class="status-badge">
+            <div id="status-dot" class="status-dot"></div>
+            <span id="status-text">Engine: Not Initialized</span>
+        </div>
+
+        <textarea id="prompt-input"
+            placeholder="Type your application idea here (min 5 lines recommended)..."></textarea>
+
+        <button id="run-btn" disabled>
+            <div id="btn-loader" class="loader"></div>
+            <span id="btn-text">Initialize & Run Sanity Check</span>
+        </button>
+
+        <div id="progress-container" class="progress-container">
+            <p id="progress-text" style="font-size: 0.9rem; color: var(--text-dim);">Downloading model...</p>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="results-card" class="results">
+            <h3 id="result-title">Result</h3>
+            <p id="result-feedback" style="margin-top: 10px;"></p>
+            <pre id="result-json"></pre>
+        </div>
+
+        <div class="mobile-notice">
+            Requires WebGPU support (Chrome 113+, Safari 18+)
+        </div>
+    </div>
+
+    <script type="module">
+        import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.80/+esm";
+
+        const runBtn = document.getElementById('run-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnLoader = document.getElementById('btn-loader');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const input = document.getElementById('prompt-input');
+        const progressContainer = document.getElementById('progress-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const resultsCard = document.getElementById('results-card');
+        const resultFeedback = document.getElementById('result-feedback');
+        const resultJson = document.getElementById('result-json');
+
+        const SELECTED_MODEL = "gemma-2b-it-q4f16_1-MLC";
+        let engine;
+        let engineInitialized = false;
+
+        // Initialize state
+        runBtn.disabled = false;
+        
+        // Check if engine was previously initialized
+        if (sessionStorage.getItem('webllm_initialized')) {
+            engineInitialized = true;
+            statusDot.classList.add('active');
+            statusText.innerText = "Engine: Ready (Gemma-2b)";
+        }
+
+        async function initEngine() {
+            if (engine && engineInitialized) {
+                console.log("Engine already initialized, skipping...");
+                return;
+            }
+
+            statusText.innerText = "Engine: Initializing...";
+            progressContainer.style.display = "block";
+            runBtn.disabled = true;
+
+            const initProgressCallback = (report) => {
+                console.log("Progress Report:", report);
+                const progress = (report.progress || 0) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressText.innerText = report.text || "Loading model...";
+                console.log(`Progress: ${progress}%`);
+            };
+
+            try {
+                engine = new webllm.MLCEngine();
+                console.log("Engine created, starting reload...");
+                await engine.reload(SELECTED_MODEL, { initProgressCallback });
+                
+                // Mark as ready after successful initialization
+                engineInitialized = true;
+                sessionStorage.setItem('webllm_initialized', 'true');
+                statusDot.classList.add('active');
+                statusText.innerText = "Engine: Ready (Gemma-2b)";
+                progressContainer.style.display = "none";
+                progressFill.style.width = "100%";
+                console.log("Engine initialization complete");
+            } catch (err) {
+                console.error("Engine initialization failed:", err);
+                statusText.innerText = "Engine: Error";
+                statusDot.style.background = "var(--accent-color)";
+                progressContainer.style.display = "none";
+                throw err;
+            }
+        }
+
+        async function runSanityCheck() {
+            const userInput = input.value.trim();
+            if (!userInput) return;
+
+            try {
+                await initEngine();
+            } catch (initErr) {
+                console.error("Initialization Failed:", initErr);
+                resultFeedback.innerText = "Engine setup failed. Check console for GPU/Network details.";
+                resultJson.innerText = initErr.message;
+                resultsCard.classList.add('visible');
+                btnText.innerText = "Retry Initialization";
+                btnLoader.style.display = "none";
+                runBtn.disabled = false;
+                statusText.innerText = "Engine: Error";
+                statusDot.style.background = "var(--accent-color)";
+                return;
+            }
+
+            btnText.innerText = "Analyzing...";
+            btnLoader.style.display = "block";
+            runBtn.disabled = true;
+            resultsCard.classList.remove('visible');
+
+            const SYSTEM_PROMPT = `You are a technical spec sanity checker. 
+Analyze the input and determine if it has enough detail (approx 5 lines).
+Return ONLY a valid JSON object with these keys:
+- can_proceed: boolean
+- feedback: string (constructive advice)
+- metadata: { maturity: "Greenfield" | "Brownfield" | null, environment: string | null }`;
+
+            try {
+                console.log("Starting analysis with input:", userInput);
+                console.log("Engine state:", engine);
+                
+                const completion = await engine.chat.completions.create({
+                    messages: [
+                        { role: "system", content: SYSTEM_PROMPT },
+                        { role: "user", content: userInput }
+                    ],
+                    stream: false
+                });
+
+                console.log("Raw completion:", completion);
+                let response = completion.choices[0].message.content;
+                console.log("Response text:", response);
+                
+                // Extract JSON from markdown code blocks if present
+                const jsonMatch = response.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
+                if (jsonMatch) {
+                    console.log("Found JSON in code blocks");
+                    response = jsonMatch[1].trim();
+                } else {
+                    // Try to find raw JSON object
+                    const rawJsonMatch = response.match(/\{[\s\S]*\}/);
+                    if (rawJsonMatch) {
+                        console.log("Found raw JSON object");
+                        response = rawJsonMatch[0];
+                    } else {
+                        console.log("No JSON found, using full response");
+                    }
+                }
+                
+                console.log("Parsed text before JSON.parse:", response);
+                
+                // Clean up JSON: remove unescaped newlines/tabs within strings
+                let cleanedResponse = response
+                    .replace(/\n/g, ' ')      // Replace newlines with spaces
+                    .replace(/\r/g, ' ')      // Replace carriage returns
+                    .replace(/\t/g, ' ')      // Replace tabs
+                    .replace(/  +/g, ' ')     // Collapse multiple spaces
+                    .replace(/'/g, '"');      // Replace single quotes with double quotes
+                
+                console.log("Cleaned response:", cleanedResponse);
+                
+                // Try to parse JSON
+                let parsed;
+                try {
+                    parsed = JSON.parse(cleanedResponse);
+                } catch (parseErr) {
+                    console.error("JSON parse failed, attempting recovery...", parseErr);
+                    console.log("Failed on:", cleanedResponse);
+                    
+                    // Last resort: try to extract and reconstruct the JSON
+                    const jsonStart = cleanedResponse.indexOf('{');
+                    const jsonEnd = cleanedResponse.lastIndexOf('}');
+                    if (jsonStart !== -1 && jsonEnd !== -1) {
+                        const extracted = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+                        console.log("Extracted JSON:", extracted);
+                        parsed = JSON.parse(extracted);
+                    } else {
+                        throw parseErr;
+                    }
+                }
+                console.log("Parsed JSON:", parsed);
+
+                resultFeedback.innerText = parsed.feedback;
+                resultJson.innerText = JSON.stringify(parsed, null, 2);
+                resultsCard.classList.add('visible');
+
+            } catch (err) {
+                console.error("Analysis error:", err);
+                console.error("Stack:", err.stack);
+                resultFeedback.innerText = "Error during analysis: " + err.message;
+                resultsCard.classList.add('visible');
+            } finally {
+                btnText.innerText = "Run Sanity Check";
+                btnLoader.style.display = "none";
+                runBtn.disabled = false;
+            }
+        }
+
+        runBtn.addEventListener('click', runSanityCheck);
+    </script>
+</body>
+
+</html>
