@@ -41,6 +41,21 @@ def sanity_router(state: AgentState) -> str:
     print("=== ROUTER: Sanity check failed, ending workflow ===")
     return "end"
 
+
+def entry_router(state: AgentState) -> str:
+    """Route at entry: skip sanity check if already passed or has components."""
+    # If we already have components or sanity was passed, skip to component_master
+    components = state.get("components", {})
+    has_components = any(v for v in components.values() if v)
+    
+    if has_components or state.get("can_proceed", False):
+        print("=== ROUTER: Skipping sanity check, routing directly to component_master ===")
+        return "component_master"
+    
+    print("=== ROUTER: First submission, routing to sanity_checker ===")
+    return "sanity_checker"
+
+
 workflow = StateGraph(AgentState)
 
 workflow.add_node("sanity_checker", sanity_checker_node)
@@ -49,7 +64,15 @@ workflow.add_node("input_gatherer", input_gatherer_node)
 workflow.add_node("detailer", detailer_node)
 workflow.add_node("refiner", refiner_node)
 
-workflow.add_edge(START, "sanity_checker")
+# Entry point routes based on whether sanity check is needed
+workflow.add_conditional_edges(
+    START,
+    entry_router,
+    {
+        "sanity_checker": "sanity_checker",
+        "component_master": "component_master",
+    }
+)
 
 workflow.add_conditional_edges(
     "sanity_checker",

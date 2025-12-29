@@ -168,10 +168,213 @@ def inject_custom_css():
             font-weight: 600 !important;
         }
         
+        
         /* Sidebar styling tweak */
         [data-testid="stSidebar"] {
             background-color: #0E1117;
             border-right: 1px solid #2D2E3A;
+        }
+        
+        /* === COMPREHENSIVE STREAMLIT OVERRIDES FOR DEPLOYMENT === */
+        
+        /* Main container backgrounds */
+        .main .block-container {
+            background-color: #0E1117;
+            padding-top: 2rem;
+        }
+        
+        /* All Streamlit widgets - base styling */
+        .stSelectbox, .stMultiSelect, .stSlider, .stCheckbox, .stRadio {
+            color: #F9FAFB !important;
+        }
+        
+        /* Select boxes and dropdowns */
+        .stSelectbox > div > div,
+        .stMultiSelect > div > div {
+            background-color: #1A1C23 !important;
+            border: 1px solid #2D2E3A !important;
+            color: #F9FAFB !important;
+        }
+        
+        /* Dropdown menu items */
+        [data-baseweb="menu"] {
+            background-color: #1A1C23 !important;
+            border: 1px solid #2D2E3A !important;
+        }
+        
+        [data-baseweb="menu"] li {
+            background-color: #1A1C23 !important;
+            color: #F9FAFB !important;
+        }
+        
+        [data-baseweb="menu"] li:hover {
+            background-color: #2D2E3A !important;
+        }
+        
+        /* Input fields (text, number, etc.) */
+        .stTextInput input,
+        .stNumberInput input {
+            background-color: #1A1C23 !important;
+            border: 1px solid #2D2E3A !important;
+            color: #F9FAFB !important;
+            border-radius: 8px !important;
+        }
+        
+        .stTextInput input:focus,
+        .stNumberInput input:focus {
+            border-color: #7C3AED !important;
+            box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3) !important;
+        }
+        
+        /* Slider */
+        .stSlider > div > div > div {
+            background-color: #2D2E3A !important;
+        }
+        
+        .stSlider > div > div > div > div {
+            background-color: #7C3AED !important;
+        }
+        
+        /* Checkbox and Radio */
+        .stCheckbox label,
+        .stRadio label {
+            color: #F9FAFB !important;
+        }
+        
+        /* Success, Info, Warning, Error messages */
+        .stAlert {
+            background-color: #1A1C23 !important;
+            border: 1px solid #2D2E3A !important;
+            color: #F9FAFB !important;
+        }
+        
+        [data-testid="stNotificationContentSuccess"] {
+            background-color: rgba(16, 185, 129, 0.1) !important;
+            border-left: 3px solid #10B981 !important;
+        }
+        
+        [data-testid="stNotificationContentInfo"] {
+            background-color: rgba(59, 130, 246, 0.1) !important;
+            border-left: 3px solid #3B82F6 !important;
+        }
+        
+        [data-testid="stNotificationContentWarning"] {
+            background-color: rgba(245, 158, 11, 0.1) !important;
+            border-left: 3px solid #F59E0B !important;
+        }
+        
+        [data-testid="stNotificationContentError"] {
+            background-color: rgba(239, 68, 68, 0.1) !important;
+            border-left: 3px solid #EF4444 !important;
+        }
+        
+        /* Spinner */
+        .stSpinner > div {
+            border-color: #7C3AED !important;
+        }
+        
+        /* Progress bar */
+        .stProgress > div > div {
+            background-color: #2D2E3A !important;
+        }
+        
+        .stProgress > div > div > div {
+            background-color: #7C3AED !important;
+        }
+        
+        /* Download button */
+        .stDownloadButton > button {
+            background: linear-gradient(180deg, #2E303E 0%, #1F2128 100%) !important;
+            color: #F9FAFB !important;
+            border: 1px solid #3F4152 !important;
+        }
+        
+        .stDownloadButton > button:hover {
+            border-color: #7C3AED !important;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2) !important;
+        }
+        
+        /* Form submit button */
+        .stFormSubmitButton > button {
+            background: linear-gradient(180deg, #7C3AED 0%, #6D28D9 100%) !important;
+            color: #F9FAFB !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }
+        
+        .stFormSubmitButton > button:hover {
+            background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%) !important;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4) !important;
+        }
+        
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {
+            background-color: transparent !important;
+            border-bottom: 1px solid #2D2E3A !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            color: #94A3B8 !important;
+            background-color: transparent !important;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            color: #7C3AED !important;
+            border-bottom-color: #7C3AED !important;
+        }
+        
+        /* Expander content */
+        .streamlit-expanderContent {
+            background-color: #15171E !important;
+            border: 1px solid #2D2E3A !important;
+            border-top: none !important;
+        }
+        
+        /* Code blocks */
+        .stCodeBlock {
+            background-color: #1A1C23 !important;
+            border: 1px solid #2D2E3A !important;
+        }
+        
+        code {
+            background-color: #1A1C23 !important;
+            color: #E2E8F0 !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+        }
+        
+        /* Dataframe/Table */
+        .stDataFrame {
+            background-color: #1A1C23 !important;
+            border: 1px solid #2D2E3A !important;
+        }
+        
+        /* Metric */
+        [data-testid="stMetricValue"] {
+            color: #F9FAFB !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #94A3B8 !important;
+        }
+        
+        /* Caption text */
+        .stCaption {
+            color: #94A3B8 !important;
+        }
+        
+        /* Divider */
+        hr {
+            border-color: #2D2E3A !important;
+        }
+        
+        /* Markdown links */
+        a {
+            color: #7C3AED !important;
+        }
+        
+        a:hover {
+            color: #8B5CF6 !important;
         }
     </style>
     """, unsafe_allow_html=True)
