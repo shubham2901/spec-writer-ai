@@ -6,21 +6,19 @@ from src.state import AgentState
 from src.persona import SYSTEM_PERSONA, MODEL_NAME
 
 SANITY_CHECK_PROMPT = """
-You are a sanity checker for technical specifications. 
-Analyze the following user input:
+Analyze the following user input for technical specification suitability:
 {user_input}
 
-Determine if the input is descriptive enough to start writing a technical spec (at least 5 lines of meaningful text).
-Also, try to extract project metadata if possible:
-- "maturity": "Greenfield" or "Brownfield"
-- "environment": "Web", "Mobile", "Backend", etc.
+Task:
+1. Determine if the input is descriptive enough to start writing a technical spec (at least 5 lines of meaningful text).
+2. Extract project metadata if possible.
 
 Return a JSON object with:
 - "can_proceed": bool (True if descriptive enough)
-- "feedback": str (constructive feedback for the user)
+- "feedback": str (Constructive feedback for the user in the voice and tone of the System Persona defined above. Use the 'Missing Foundations' structure if rejecting.)
 - "metadata": {
-    "maturity": str or null,
-    "environment": str or null
+    "maturity": "Greenfield" | "Brownfield" | null,
+    "environment": "Web" | "Mobile" | "Backend" | null
   }
 """
 
@@ -29,15 +27,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Module-level LLM client (created once at import time)
-_llm = ChatGoogleGenerativeAI(model=MODEL_NAME)
-
 async def sanity_checker_node(state: AgentState) -> AgentState:
     """True implementation of sanity checker using centralized model name."""
     
     logger.info("Sanity Checker Node started.")
     
-    llm = _llm
+    # Using 'rest' transport can sometimes resolve 404/connectivity issues
+    llm = ChatGoogleGenerativeAI(
+        model=MODEL_NAME
+    )
     
     # Use replace to avoid KeyError if the user input contains curly braces
     prompt = SANITY_CHECK_PROMPT.replace("{user_input}", state["raw_input"])
@@ -72,10 +70,12 @@ async def sanity_checker_node(state: AgentState) -> AgentState:
             logger.info("Successfully parsed JSON content.")
         except json.JSONDecodeError as e:
             logger.error(f"JSON Decode Error: {e}. Raw text: {text}")
-            content = {"can_proceed": False, "feedback": f"Failed to parse JSON. Raw: {text[:100]}...", "metadata": {}}
+            # Fallback: Use raw text as feedback if JSON parse fails
+            content = {"can_proceed": False, "feedback": text, "metadata": {}}
     else:
         logger.warning(f"No JSON found in response. Raw text: {text}")
-        content = {"can_proceed": False, "feedback": f"No JSON found in response. Raw: {text[:100]}...", "metadata": {}}
+        # Fallback: Use raw text as feedback if no JSON found
+        content = {"can_proceed": False, "feedback": text, "metadata": {}}
     
     return {
         **state,

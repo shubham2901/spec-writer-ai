@@ -12,11 +12,11 @@ from src.knowledge_base import PRD_COMPONENT_NAMES
 logger = logging.getLogger(__name__)
 
 
-DETAILER_PROMPT = """You are a PRD (Product Requirements Document) editor. Your task is to elaborate and refine each component without adding new functional requirements.
+DETAILER_PROMPT = """You are a spec editor. Specs can be PRD, code prompt, general prompt, etc. Your task is to elaborate and refine each component without adding new functional requirements.
 
 ## Instructions:
 1. **Elaborate**: Clean up and structure the text for clarity. Fix grammar, improve flow, but DO NOT add new features or requirements.
-2. **Question Generation**: Generate exactly 3 targeted questions that would help deepen the detail for this component.
+2. **Question Generation**: Assess detials that are missing or unclear with respect to the goal and PRD context for that specific component. Generate less than 4 questions to help the user refine the spec. If the details are good, return an empty list of questions. 
 
 ## Component to Detail:
 **{component_name}**
@@ -31,7 +31,7 @@ Return a JSON object with this exact structure:
   "questions": [
     "First targeted question to deepen detail?",
     "Second targeted question to deepen detail?",
-    "Third targeted question to deepen detail?"
+    and so on..
   ]
 }}
 

@@ -19,3 +19,4 @@ class AgentState(TypedDict):
     
     detailed_components: Dict[str, Dict[str, Any]]
     is_detailed: bool
+    question_answers: Dict[str, Dict[int, str]]  # component_name -> {question_idx: answer}
